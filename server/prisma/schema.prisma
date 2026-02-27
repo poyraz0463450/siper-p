@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  password_hash String
+  role          String   @default("user") // admin, user
+  created_at    DateTime @default(now())
+}
+
+model Part {
+  id              Int     @id @default(autoincrement())
+  name            String
+  material        String?
+  heat_treatment  String?
+  coating         String?
+  operation_code  String?
+  location_code   String?
+  image_url       String? // Path to stored image
+  stock_quantity  Int     @default(0)
+  min_stock_level Int     @default(0)
+
+  // Cost tracking
+  average_cost Float  @default(0)
+  currency     String @default("TL")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  model_parts       ModelPart[]
+  part_suppliers    PartSupplier[]
+  purchaseRequests  PurchaseRequest[]
+  stockReservations StockReservation[]
+}
+
+model Model {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  model_parts ModelPart[]
+  orders      ProductionOrder[]
+}
+
+model ModelPart {
+  part_id           Int
+  model_id          Int
+  quantity_required Int
+
+  part  Part  @relation(fields: [part_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id])
+
+  @@id([part_id, model_id])
+}
+
+model ProductionOrder {
+  id         Int     @id @default(autoincrement())
+  order_code String  @unique // UE-2026-0001 formatında
+  model_id   Int
+  quantity   Int     @default(1)
+  priority   String  @default("normal") // low, normal, high, urgent
+  status     String  @default("planned") // planned, pending_approval, in_progress, quality_check, completed, cancelled
+  notes      String?
+
+  // Cost tracking
+  realized_cost Float? // Actual cost snapshot when completed
+
+  model        Model              @relation(fields: [model_id], references: [id])
+  reservations StockReservation[]
+
+  due_date        DateTime?
+  started_at      DateTime?
+  completed_at    DateTime?
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+  PurchaseRequest PurchaseRequest[]
+}
+
+model Supplier {
+  id         Int      @id @default(autoincrement())
+  name       String
+  contact    String?
+  phone      String?
+  email      String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  parts    PartSupplier[]
+  requests PurchaseRequest[]
+}
+
+model PartSupplier {
+  part_id     Int
+  supplier_id Int
+  price       Float
+  currency    String  @default("TL")
+  is_primary  Boolean @default(false)
+
+  // Planning
+  lead_time_days Int @default(3) // Estimated delivery time
+
+  part     Part     @relation(fields: [part_id], references: [id])
+  supplier Supplier @relation(fields: [supplier_id], references: [id])
+
+  @@id([part_id, supplier_id])
+}
+
+model PurchaseRequest {
+  id          Int      @id @default(autoincrement())
+  pr_code     String   @unique // PR-2026-0001
+  part_id     Int
+  order_id    Int?
+  quantity    Int
+  status      String   @default("pending") // pending, approved, ordered, received
+  supplier_id Int?
+  unit_price  Float?
+  notes       String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  part     Part             @relation(fields: [part_id], references: [id])
+  order    ProductionOrder? @relation(fields: [order_id], references: [id])
+  supplier Supplier?        @relation(fields: [supplier_id], references: [id])
+}
+
+model StockReservation {
+  id          Int      @id @default(autoincrement())
+  part_id     Int
+  order_id    Int
+  quantity    Int
+  status      String   @default("active") // active, consumed, released
+  reserved_at DateTime @default(now())
+
+  part  Part            @relation(fields: [part_id], references: [id])
+  order ProductionOrder @relation(fields: [order_id], references: [id])
+
+  @@unique([part_id, order_id])
+}
