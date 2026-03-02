@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ShoppingBag, Plus, X, Search, RefreshCw, Edit2 } from 'lucide-react';
+import { ShoppingBag, Plus, X, Search, RefreshCw } from 'lucide-react';
 import {
     getAllPurchaseRequests, createPurchaseRequest, updatePurchaseRequest,
-    getAllSuppliers, createSupplier, getAllParts
+    getAllSuppliers, getAllParts
 } from '../lib/firestoreService';
 import type { PurchaseRequest, Supplier, Part, PRStatus } from '../lib/types';
 

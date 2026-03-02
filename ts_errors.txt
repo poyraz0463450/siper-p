@@ -1,0 +1,193 @@
+﻿[96msrc/components/PurchaseRequestModal.tsx[0m:[93m2[0m:[93m42[0m - [91merror[0m[90m TS6133: [0m'AlertCircle' is declared but its value is never read.
+
+[7m2[0m import { X, Save, Building2, Calculator, AlertCircle } from 'lucide-react';
+[7m [0m [91m                                         ~~~~~~~~~~~[0m
+
+[96msrc/layouts/Layout.tsx[0m:[93m7[0m:[93m53[0m - [91merror[0m[90m TS6133: [0m'Settings' is declared but its value is never read.
+
+[7m7[0m     Users, Bell, ChevronDown, ChevronRight, Search, Settings
+[7m [0m [91m                                                    ~~~~~~~~[0m
+
+[96msrc/layouts/Layout.tsx[0m:[93m17[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '@fontsource/jetbrains-mono' or its corresponding type declarations.
+
+[7m17[0m import '@fontsource/jetbrains-mono';
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/firestoreService.ts[0m:[93m4[0m:[93m17[0m - [91merror[0m[90m TS6133: [0m'Timestamp' is declared but its value is never read.
+
+[7m4[0m     writeBatch, Timestamp, setDoc
+[7m [0m [91m                ~~~~~~~~~[0m
+
+[96msrc/pages/AuditLogs.tsx[0m:[93m2[0m:[93m38[0m - [91merror[0m[90m TS6133: [0m'Filter' is declared but its value is never read.
+
+[7m2[0m import { History, RefreshCw, Search, Filter } from 'lucide-react';
+[7m [0m [91m                                     ~~~~~~[0m
+
+[96msrc/pages/DocumentCenter.tsx[0m:[93m2[0m:[93m41[0m - [91merror[0m[90m TS6133: [0m'Plus' is declared but its value is never read.
+
+[7m2[0m import { FileText, Search, Upload, Eye, Plus, X, FileIcon, Clock, User } from 'lucide-react';
+[7m [0m [91m                                        ~~~~[0m
+
+[96msrc/pages/DocumentCenter.tsx[0m:[93m2[0m:[93m60[0m - [91merror[0m[90m TS6133: [0m'Clock' is declared but its value is never read.
+
+[7m2[0m import { FileText, Search, Upload, Eye, Plus, X, FileIcon, Clock, User } from 'lucide-react';
+[7m [0m [91m                                                           ~~~~~[0m
+
+[96msrc/pages/DocumentCenter.tsx[0m:[93m18[0m:[93m12[0m - [91merror[0m[90m TS6133: [0m'loading' is declared but its value is never read.
+
+[7m18[0m     const [loading, setLoading] = useState(true);
+[7m  [0m [91m           ~~~~~~~[0m
+
+[96msrc/pages/Inventory.tsx[0m:[93m4[0m:[93m31[0m - [91merror[0m[90m TS6133: [0m'RefreshCw' is declared but its value is never read.
+
+[7m4[0m     Package, Search, Plus, X, RefreshCw, AlertTriangle, Upload,
+[7m [0m [91m                              ~~~~~~~~~[0m
+
+[96msrc/pages/Inventory.tsx[0m:[93m5[0m:[93m5[0m - [91merror[0m[90m TS6133: [0m'Filter' is declared but its value is never read.
+
+[7m5[0m     Filter, Download, Edit2, Trash2
+[7m [0m [91m    ~~~~~~[0m
+
+[96msrc/pages/Inventory.tsx[0m:[93m5[0m:[93m13[0m - [91merror[0m[90m TS6133: [0m'Download' is declared but its value is never read.
+
+[7m5[0m     Filter, Download, Edit2, Trash2
+[7m [0m [91m            ~~~~~~~~[0m
+
+[96msrc/pages/Inventory.tsx[0m:[93m8[0m:[93m5[0m - [91merror[0m[90m TS6133: [0m'getAllParts' is declared but its value is never read.
+
+[7m8[0m     getAllParts, createPart, updatePart, deletePart, onPartsSnapshot
+[7m [0m [91m    ~~~~~~~~~~~[0m
+
+[96msrc/pages/Inventory.tsx[0m:[93m17[0m:[93m11[0m - [91merror[0m[90m TS6133: [0m'user' is declared but its value is never read.
+
+[7m17[0m     const { user } = useAuth();
+[7m  [0m [91m          ~~~~~~~~[0m
+
+[96msrc/pages/Inventory.tsx[0m:[93m24[0m:[93m12[0m - [91merror[0m[90m TS6133: [0m'loading' is declared but its value is never read.
+
+[7m24[0m     const [loading, setLoading] = useState(true);
+[7m  [0m [91m           ~~~~~~~[0m
+
+[96msrc/pages/Models.tsx[0m:[93m3[0m:[93m22[0m - [91merror[0m[90m TS6133: [0m'Search' is declared but its value is never read.
+
+[7m3[0m     Layers, Plus, X, Search, RefreshCw, Edit2, Trash2, Package
+[7m [0m [91m                     ~~~~~~[0m
+
+[96msrc/pages/Models.tsx[0m:[93m3[0m:[93m30[0m - [91merror[0m[90m TS6133: [0m'RefreshCw' is declared but its value is never read.
+
+[7m3[0m     Layers, Plus, X, Search, RefreshCw, Edit2, Trash2, Package
+[7m [0m [91m                             ~~~~~~~~~[0m
+
+[96msrc/pages/Models.tsx[0m:[93m3[0m:[93m41[0m - [91merror[0m[90m TS6133: [0m'Edit2' is declared but its value is never read.
+
+[7m3[0m     Layers, Plus, X, Search, RefreshCw, Edit2, Trash2, Package
+[7m [0m [91m                                        ~~~~~[0m
+
+[96msrc/pages/Models.tsx[0m:[93m7[0m:[93m10[0m - [91merror[0m[90m TS6133: [0m'updateDoc' is declared but its value is never read.
+
+[7m7[0m import { updateDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+[7m [0m [91m         ~~~~~~~~~[0m
+
+[96msrc/pages/Models.tsx[0m:[93m7[0m:[93m37[0m - [91merror[0m[90m TS6133: [0m'serverTimestamp' is declared but its value is never read.
+
+[7m7[0m import { updateDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~[0m
+
+[96msrc/pages/Models.tsx[0m:[93m17[0m:[93m12[0m - [91merror[0m[90m TS6133: [0m'loading' is declared but its value is never read.
+
+[7m17[0m     const [loading, setLoading] = useState(true);
+[7m  [0m [91m           ~~~~~~~[0m
+
+[96msrc/pages/Procurement.tsx[0m:[93m2[0m:[93m51[0m - [91merror[0m[90m TS6133: [0m'Edit2' is declared but its value is never read.
+
+[7m2[0m import { ShoppingBag, Plus, X, Search, RefreshCw, Edit2 } from 'lucide-react';
+[7m [0m [91m                                                  ~~~~~[0m
+
+[96msrc/pages/Procurement.tsx[0m:[93m5[0m:[93m22[0m - [91merror[0m[90m TS6133: [0m'createSupplier' is declared but its value is never read.
+
+[7m5[0m     getAllSuppliers, createSupplier, getAllParts
+[7m [0m [91m                     ~~~~~~~~~~~~~~[0m
+
+[96msrc/pages/Production.tsx[0m:[93m3[0m:[93m29[0m - [91merror[0m[90m TS6133: [0m'RefreshCw' is declared but its value is never read.
+
+[7m3[0m     ClipboardList, Plus, X, RefreshCw, Search, Clock, CheckCircle,
+[7m [0m [91m                            ~~~~~~~~~[0m
+
+[96msrc/pages/Production.tsx[0m:[93m3[0m:[93m48[0m - [91merror[0m[90m TS6133: [0m'Clock' is declared but its value is never read.
+
+[7m3[0m     ClipboardList, Plus, X, RefreshCw, Search, Clock, CheckCircle,
+[7m [0m [91m                                               ~~~~~[0m
+
+[96msrc/pages/Production.tsx[0m:[93m3[0m:[93m55[0m - [91merror[0m[90m TS6133: [0m'CheckCircle' is declared but its value is never read.
+
+[7m3[0m     ClipboardList, Plus, X, RefreshCw, Search, Clock, CheckCircle,
+[7m [0m [91m                                                      ~~~~~~~~~~~[0m
+
+[96msrc/pages/Production.tsx[0m:[93m4[0m:[93m5[0m - [91merror[0m[90m TS6133: [0m'AlertTriangle' is declared but its value is never read.
+
+[7m4[0m     AlertTriangle, RotateCcw, ArrowRight, Trash2, Edit2
+[7m [0m [91m    ~~~~~~~~~~~~~[0m
+
+[96msrc/pages/Production.tsx[0m:[93m4[0m:[93m20[0m - [91merror[0m[90m TS6133: [0m'RotateCcw' is declared but its value is never read.
+
+[7m4[0m     AlertTriangle, RotateCcw, ArrowRight, Trash2, Edit2
+[7m [0m [91m                   ~~~~~~~~~[0m
+
+[96msrc/pages/Production.tsx[0m:[93m4[0m:[93m31[0m - [91merror[0m[90m TS6133: [0m'ArrowRight' is declared but its value is never read.
+
+[7m4[0m     AlertTriangle, RotateCcw, ArrowRight, Trash2, Edit2
+[7m [0m [91m                              ~~~~~~~~~~[0m
+
+[96msrc/pages/Production.tsx[0m:[93m7[0m:[93m5[0m - [91merror[0m[90m TS6133: [0m'getAllOrders' is declared but its value is never read.
+
+[7m7[0m     getAllOrders, createOrder, updateOrder, deleteOrder as deleteOrderFn,
+[7m [0m [91m    ~~~~~~~~~~~~[0m
+
+[96msrc/pages/Production.tsx[0m:[93m32[0m:[93m11[0m - [91merror[0m[90m TS6133: [0m'user' is declared but its value is never read.
+
+[7m32[0m     const { user } = useAuth();
+[7m  [0m [91m          ~~~~~~~~[0m
+
+[96msrc/pages/Production.tsx[0m:[93m35[0m:[93m12[0m - [91merror[0m[90m TS6133: [0m'loading' is declared but its value is never read.
+
+[7m35[0m     const [loading, setLoading] = useState(true);
+[7m  [0m [91m           ~~~~~~~[0m
+
+[96msrc/pages/QualityControl.tsx[0m:[93m28[0m:[93m12[0m - [91merror[0m[90m TS6133: [0m'loading' is declared but its value is never read.
+
+[7m28[0m     const [loading, setLoading] = useState(true);
+[7m  [0m [91m           ~~~~~~~[0m
+
+[96msrc/pages/QualityControl.tsx[0m:[93m36[0m:[93m12[0m - [91merror[0m[90m TS6133: [0m'testNotes' is declared but its value is never read.
+
+[7m36[0m     const [testNotes, setTestNotes] = useState('');
+[7m  [0m [91m           ~~~~~~~~~[0m
+
+[96msrc/pages/QualityControl.tsx[0m:[93m36[0m:[93m23[0m - [91merror[0m[90m TS6133: [0m'setTestNotes' is declared but its value is never read.
+
+[7m36[0m     const [testNotes, setTestNotes] = useState('');
+[7m  [0m [91m                      ~~~~~~~~~~~~[0m
+
+[96msrc/pages/SerialTracking.tsx[0m:[93m5[0m:[93m26[0m - [91merror[0m[90m TS6133: [0m'ChevronDown' is declared but its value is never read.
+
+[7m5[0m     Target, CheckCircle, ChevronDown, ChevronRight, X, User, Layers
+[7m [0m [91m                         ~~~~~~~~~~~[0m
+
+[96msrc/pages/SerialTracking.tsx[0m:[93m5[0m:[93m39[0m - [91merror[0m[90m TS6133: [0m'ChevronRight' is declared but its value is never read.
+
+[7m5[0m     Target, CheckCircle, ChevronDown, ChevronRight, X, User, Layers
+[7m [0m [91m                                      ~~~~~~~~~~~~[0m
+
+[96msrc/pages/SerialTracking.tsx[0m:[93m9[0m:[93m72[0m - [91merror[0m[90m TS6133: [0m'updateSerial' is declared but its value is never read.
+
+[7m9[0m     createSerial, addOperationLog, generateSerialNumber, getAllModels, updateSerial
+[7m [0m [91m                                                                       ~~~~~~~~~~~~[0m
+
+[96msrc/pages/SerialTracking.tsx[0m:[93m34[0m:[93m11[0m - [91merror[0m[90m TS6133: [0m'user' is declared but its value is never read.
+
+[7m34[0m     const { user } = useAuth();
+[7m  [0m [91m          ~~~~~~~~[0m
+
+
+Found 38 errors.
+

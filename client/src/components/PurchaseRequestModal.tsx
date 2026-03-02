@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Building2, Calculator, AlertCircle } from 'lucide-react';
+import { X, Save, Building2, Calculator } from 'lucide-react';
 import { toast } from 'sonner';
-import api from '../lib/api';
+import { getAllSuppliers, createPurchaseRequest } from '../lib/firestoreService';
+import type { Supplier } from '../lib/types';
 
 interface PurchaseRequestModalProps {
-    part: any; // Using any for simplicity as Part type needs update
+    part: any;
     requiredQuantity: number;
     currentStock: number;
     onClose: () => void;
@@ -15,20 +16,14 @@ export default function PurchaseRequestModal({ part, requiredQuantity, currentSt
     const [quantity, setQuantity] = useState(0);
     const [notes, setNotes] = useState('');
     const [loading, setLoading] = useState(false);
-    const [suppliers, setSuppliers] = useState<any[]>([]);
+    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [selectedSupplier, setSelectedSupplier] = useState<string>('');
 
-    // Calculate initial suggestion
     useEffect(() => {
         const missing = Math.max(0, requiredQuantity - currentStock);
         setQuantity(missing);
 
-        // Fetch suppliers
-        api.get('/procurement/suppliers').then(res => {
-            setSuppliers(res.data);
-            // Try to find preferred supplier for this part
-            // For now, simpler matching or just leave empty
-        }).catch(err => console.error(err));
+        getAllSuppliers().then(setSuppliers).catch(err => console.error(err));
     }, [requiredQuantity, currentStock]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -36,11 +31,16 @@ export default function PurchaseRequestModal({ part, requiredQuantity, currentSt
         setLoading(true);
 
         try {
-            await api.post('/procurement/requests', {
-                part_id: part.id,
+            const supplier = suppliers.find(s => s.id === selectedSupplier);
+            await createPurchaseRequest({
+                prCode: '',
+                partId: part.id,
+                partName: part.name || '',
                 quantity: Number(quantity),
-                notes,
-                supplier_id: selectedSupplier || undefined
+                status: 'pending',
+                supplierId: selectedSupplier || undefined,
+                supplierName: supplier?.name || undefined,
+                notes: notes || undefined,
             });
 
             toast.success('Satın alma talebi oluşturuldu');
@@ -71,7 +71,7 @@ export default function PurchaseRequestModal({ part, requiredQuantity, currentSt
                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-blue-200 font-medium">{part.name}</span>
-                            <span className="text-xs text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded border border-blue-500/30">{part.operation_code || '-'}</span>
+                            <span className="text-xs text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded border border-blue-500/30">{part.partCode || part.operation_code || '-'}</span>
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground mt-3">
                             <div>

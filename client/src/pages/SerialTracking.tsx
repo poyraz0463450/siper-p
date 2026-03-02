@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
     QrCode, Search, Plus, Clock, Wrench, Settings, Flame,
-    Target, CheckCircle, ChevronDown, ChevronRight, X, User, Layers
+    Target, CheckCircle, X, User, Layers
 } from 'lucide-react';
 import {
     getAllSerials, getSerialByNumber, getOperationLogs, getQCRecords,
-    createSerial, addOperationLog, generateSerialNumber, getAllModels, updateSerial
+    createSerial, addOperationLog, generateSerialNumber, getAllModels
 } from '../lib/firestoreService';
 import type {
     SerialRecord, OperationLog, QualityControlRecord, Model,
@@ -31,7 +31,7 @@ const PART_TYPES: PartType[] = ['Namlu', 'Sürgü', 'Gövde', 'Şarjör', 'Ana M
 
 export default function SerialTracking() {
     const [searchParams] = useSearchParams();
-    const { user } = useAuth();
+    const { user: _user } = useAuth();
     const [serials, setSerials] = useState<SerialRecord[]>([]);
     const [selectedSerial, setSelectedSerial] = useState<SerialRecord | null>(null);
     const [opLogs, setOpLogs] = useState<OperationLog[]>([]);
@@ -178,9 +178,9 @@ export default function SerialTracking() {
                                     <div className="flex items-center justify-between mt-1">
                                         <span className="text-xs text-muted-foreground">{s.modelName}</span>
                                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${s.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400' :
-                                                s.status === 'in_production' ? 'bg-blue-500/10 text-blue-400' :
-                                                    s.status === 'shipped' ? 'bg-purple-500/10 text-purple-400' :
-                                                        'bg-muted text-muted-foreground'
+                                            s.status === 'in_production' ? 'bg-blue-500/10 text-blue-400' :
+                                                s.status === 'shipped' ? 'bg-purple-500/10 text-purple-400' :
+                                                    'bg-muted text-muted-foreground'
                                             }`}>
                                             {s.status === 'completed' ? 'Tamamlandı' : s.status === 'in_production' ? 'Üretimde' : s.status === 'shipped' ? 'Sevk Edildi' : s.status}
                                         </span>
@@ -208,8 +208,8 @@ export default function SerialTracking() {
                                         <p className="text-sm text-muted-foreground">{selectedSerial.modelName}</p>
                                     </div>
                                     <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${selectedSerial.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                            selectedSerial.status === 'in_production' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                                                'bg-muted text-muted-foreground border border-white/10'
+                                        selectedSerial.status === 'in_production' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                            'bg-muted text-muted-foreground border border-white/10'
                                         }`}>
                                         {selectedSerial.status === 'completed' ? 'Tamamlandı' : selectedSerial.status === 'in_production' ? 'Üretimde' : selectedSerial.status}
                                     </span>

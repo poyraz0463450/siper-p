@@ -3,15 +3,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 
-// ⚠️ Firebase Console → Project Settings → Your apps → Config
-// Bu değerleri kendi Firebase projenizden almanız gerekir.
 const firebaseConfig = {
-  apiKey: "AIzaSyDEMO_REPLACE_ME",
-  authDomain: "brg-erp.firebaseapp.com",
-  projectId: "brg-erp",
-  storageBucket: "brg-erp.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000"
+  apiKey: "AIzaSyBnUSQP7dAY-h-IfV74QTPE2uRyXR9iFSM",
+  authDomain: "erp-project-52279.firebaseapp.com",
+  projectId: "erp-project-52279",
+  storageBucket: "erp-project-52279.firebasestorage.app",
+  messagingSenderId: "594029762817",
+  appId: "1:594029762817:web:df095c291fa622193fe300"
 };
 
 const app = initializeApp(firebaseConfig);

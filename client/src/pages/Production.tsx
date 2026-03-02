@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
-    ClipboardList, Plus, X, RefreshCw, Search, Clock, CheckCircle,
-    AlertTriangle, RotateCcw, ArrowRight, Trash2, Edit2
+    ClipboardList, Plus, X, Search,
+    Trash2, Edit2
 } from 'lucide-react';
 import {
-    getAllOrders, createOrder, updateOrder, deleteOrder as deleteOrderFn,
+    createOrder, updateOrder, deleteOrder as deleteOrderFn,
     onOrdersSnapshot, getAllModels
 } from '../lib/firestoreService';
 import type { ProductionOrder, Model, OrderStatus, OrderPriority } from '../lib/types';
@@ -29,10 +29,10 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
 const KANBAN_STATUSES: OrderStatus[] = ['planned', 'pending_approval', 'in_progress', 'quality_check', 'completed'];
 
 export default function Production() {
-    const { user } = useAuth();
+    const { user: _user } = useAuth();
     const [orders, setOrders] = useState<ProductionOrder[]>([]);
     const [models, setModels] = useState<Model[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editingOrder, setEditingOrder] = useState<ProductionOrder | null>(null);
     const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');

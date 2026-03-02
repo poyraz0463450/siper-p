@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { History, RefreshCw, Search, Filter } from 'lucide-react';
+import { History, RefreshCw, Search } from 'lucide-react';
 import { collection, getDocs, query, orderBy, limit as firestoreLimit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 

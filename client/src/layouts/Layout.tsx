@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
     LayoutDashboard, Package, Layers, ClipboardList, LogOut, Menu, X,
     History as HistoryIcon, ShoppingBag, FileText, QrCode, ShieldCheck,
-    Users, Bell, ChevronDown, ChevronRight, Search, Settings
+    Users, Bell, ChevronDown, ChevronRight, Search
 } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { cn } from '../lib/utils';
@@ -14,7 +14,7 @@ import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
-import '@fontsource/jetbrains-mono';
+
 
 interface NavSection {
     title: string;

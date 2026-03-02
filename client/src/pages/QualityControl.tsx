@@ -25,7 +25,7 @@ export default function QualityControl() {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState<QCTestType>('Mikrometre');
     const [showNewTest, setShowNewTest] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
 
     // Form states
     const [measurements, setMeasurements] = useState<Measurement[]>([
@@ -33,7 +33,7 @@ export default function QualityControl() {
     ]);
     const [firingData, setFiringData] = useState<FiringTestData>({ roundsFired: 0, malfunctions: 0, notes: '' });
     const [rodajData, setRodajData] = useState<RodajData>({ cycleCount: 0, resultNotes: '', pass: true });
-    const [testNotes, setTestNotes] = useState('');
+    const [_testNotes, _setTestNotes] = useState('');
 
     useEffect(() => {
         loadSerials();
@@ -154,8 +154,8 @@ export default function QualityControl() {
                                 key={tab.type}
                                 onClick={() => setActiveTab(tab.type)}
                                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.type
-                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                        : 'text-muted-foreground hover:bg-white/5 border border-transparent'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                    : 'text-muted-foreground hover:bg-white/5 border border-transparent'
                                     }`}
                             >
                                 <tab.icon className="w-4 h-4" />

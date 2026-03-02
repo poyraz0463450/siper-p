@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
-    Layers, Plus, X, Search, RefreshCw, Edit2, Trash2, Package
+    Layers, Plus, X, Trash2, Package
 } from 'lucide-react';
 import { getAllModels, createModel, getModelBOM, addBOMPart, getAllParts } from '../lib/firestoreService';
 import type { Model, BOMPart, Part } from '../lib/types';
-import { updateDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 export default function Models() {
@@ -14,7 +14,7 @@ export default function Models() {
     const [bomParts, setBomParts] = useState<BOMPart[]>([]);
     const [showNewModel, setShowNewModel] = useState(false);
     const [showAddBom, setShowAddBom] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
 
     const [newModelName, setNewModelName] = useState('');
     const [newModelDesc, setNewModelDesc] = useState('');

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileText, Search, Upload, Eye, Plus, X, FileIcon, Clock, User } from 'lucide-react';
+import { FileText, Search, Upload, Eye, X, FileIcon, User } from 'lucide-react';
 import { getAllDocuments, getDocumentsByPartCode, addDocument } from '../lib/firestoreService';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../lib/firebase';
@@ -15,7 +15,7 @@ export default function DocumentCenter() {
     const [partDocuments, setPartDocuments] = useState<TechnicalDocument[]>([]);
     const [viewingPdf, setViewingPdf] = useState<string | null>(null);
     const [showUpload, setShowUpload] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
 
     // Upload form
     const [uploadPartCode, setUploadPartCode] = useState('');

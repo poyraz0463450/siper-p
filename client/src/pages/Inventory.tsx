@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-    Package, Search, Plus, X, RefreshCw, AlertTriangle, Upload,
-    Filter, Download, Edit2, Trash2
+    Package, Search, Plus, X, AlertTriangle, Upload,
+    Edit2, Trash2
 } from 'lucide-react';
 import {
-    getAllParts, createPart, updatePart, deletePart, onPartsSnapshot
+    createPart, updatePart, deletePart, onPartsSnapshot
 } from '../lib/firestoreService';
 import type { Part, PartCategory } from '../lib/types';
 import { useAuth } from '../context/AuthContext';
@@ -14,14 +14,14 @@ const CATEGORIES: PartCategory[] = ['Namlu', 'Sürgü', 'Gövde', 'Şarjör', 'T
 
 export default function Inventory() {
     const [searchParams] = useSearchParams();
-    const { user } = useAuth();
+    const { user: _user } = useAuth();
     const [parts, setParts] = useState<Part[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<string>('all');
     const [showCriticalOnly, setShowCriticalOnly] = useState(searchParams.get('filter') === 'critical');
     const [showForm, setShowForm] = useState(false);
     const [editingPart, setEditingPart] = useState<Part | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
     const [showBomImport, setShowBomImport] = useState(false);
 
     // Form

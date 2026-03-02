@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper Functions ──
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getUserData().role == 'Admin';
+    }
+
+    function isApproved() {
+      return isAuthenticated() && getUserData().isApproved == true;
+    }
+
+    function hasModule(module) {
+      return isAdmin() || (isApproved() && module in getUserData().allowedModules);
+    }
+
+    // ── Users ──
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // ── Pending Users ──
+    match /pendingUsers/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── Parts (Inventory) ──
+    match /parts/{partId} {
+      allow read: if isApproved();
+      allow create, update: if hasModule('inventory');
+      allow delete: if isAdmin();
+    }
+
+    // ── Models & BOM ──
+    match /models/{modelId} {
+      allow read: if isApproved();
+      allow create, update: if hasModule('models');
+      allow delete: if isAdmin();
+
+      match /bomParts/{bomPartId} {
+        allow read: if isApproved();
+        allow write: if hasModule('models');
+      }
+    }
+
+    // ── Serial Tracking ──
+    match /serialTracking/{serialId} {
+      allow read: if isApproved();
+      allow create, update: if hasModule('serial');
+      allow delete: if isAdmin();
+
+      match /operationLogs/{logId} {
+        allow read: if isApproved();
+        allow create: if hasModule('serial');
+      }
+
+      match /qualityControl/{qcId} {
+        allow read: if isApproved();
+        allow create: if hasModule('quality');
+      }
+    }
+
+    // ── Production Orders ──
+    match /productionOrders/{orderId} {
+      allow read: if isApproved();
+      allow create, update: if hasModule('production');
+      allow delete: if isAdmin();
+    }
+
+    // ── Suppliers ──
+    match /suppliers/{supplierId} {
+      allow read: if isApproved();
+      allow write: if hasModule('procurement');
+    }
+
+    // ── Purchase Requests ──
+    match /purchaseRequests/{requestId} {
+      allow read: if isApproved();
+      allow create: if hasModule('procurement');
+      allow update: if hasModule('procurement') || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Documents ──
+    match /documents/{docId} {
+      allow read: if isApproved();
+      allow create: if hasModule('documents');
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Stock Alerts ──
+    match /stockAlerts/{alertId} {
+      allow read: if isApproved();
+      allow write: if isAdmin() || hasModule('inventory');
+    }
+
+    // ── Audit Logs ──
+    match /auditLogs/{logId} {
+      allow read: if isApproved();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Audit logs are immutable
+    }
+  }
+}
