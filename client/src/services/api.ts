@@ -46,7 +46,14 @@ export const apiRequest = async (endpoint: string, method: string = 'GET', body?
 // ----------------------------------------------------
 // Auth APIs
 // ----------------------------------------------------
-export const loginApi = (credentials: any) => apiRequest('/auth/login', 'POST', credentials);
+export const loginApi = (credentials: any) => {
+    // Backend expects 'username', but frontend form uses 'email' field
+    const payload = {
+        username: credentials.email || credentials.username,
+        password: credentials.password
+    };
+    return apiRequest('/auth/login', 'POST', payload);
+};
 export const meApi = () => apiRequest('/auth/me', 'GET');
 
 // ----------------------------------------------------
@@ -65,6 +72,18 @@ export const deletePart = (id: string) => apiRequest(`/parts/${id}`, 'DELETE');
 
 // Models
 export const fetchModels = () => apiRequest('/models', 'GET');
+export const deleteModel = (id: string | number) => apiRequest(`/models/${id}`, 'DELETE');
+export const importModels = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/models/import`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }, // No Content-Type
+        body: formData
+    });
+    return response.json();
+};
 
 // Inventory
 export const fetchInventory = () => apiRequest('/inventory', 'GET');
@@ -77,3 +96,11 @@ export const fetchQcInspections = () => apiRequest('/qc-inspections', 'GET');
 
 // Audit Logs
 export const fetchAuditLogs = () => apiRequest('/audit-logs', 'GET');
+
+// ----------------------------------------------------
+// User Management APIs
+// ----------------------------------------------------
+export const fetchUsers = () => apiRequest('/users', 'GET');
+export const createUser = (data: any) => apiRequest('/users', 'POST', data);
+export const updateUser = (id: string | number, data: any) => apiRequest(`/users/${id}`, 'PUT', data);
+export const deleteUser = (id: string | number) => apiRequest(`/users/${id}`, 'DELETE');

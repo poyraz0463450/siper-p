@@ -76,6 +76,12 @@ router.get('/:id', authenticate, async (req, res) => {
   }
 });
 
+const multer = require('multer');
+const xlsx = require('xlsx');
+
+// Geçici hafıza storage (dosyayı diske kaydetmeden işlemek için)
+const upload = multer({ storage: multer.memoryStorage() });
+
 // ─── Yeni model oluştur ───
 router.post('/', authenticate, async (req, res) => {
   try {
@@ -107,6 +113,110 @@ router.post('/', authenticate, async (req, res) => {
     }
     console.error('[MODELS] Oluşturma hatası:', error);
     res.status(500).json({ error: 'Model oluşturulamadı.' });
+  }
+});
+
+// ─── Excel'den Toplu Model İçe Aktar ───
+router.post('/import', authenticate, requireRole('admin', 'production_manager'), upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Lütfen bir Excel dosyası yükleyin.' });
+    }
+
+    // Excel dosyasını oku
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    if (data.length === 0) {
+      return res.status(400).json({ error: 'Excel dosyası boş veya formatı hatalı.' });
+    }
+
+    let successCount = 0;
+    let errorCount = 0;
+    const errors = [];
+
+    // Her satırı veritabanına ekle veya güncelle
+    for (const [index, row] of data.entries()) {
+      // Excel sütun başlıklarını Türkçe varsayalım (Kod*, İsim*, Kategori, Kalibre, Fiyat vb.)
+      // Başlıkların büyük/küçük harflerini normalize edelim
+      const getVal = (possibleKeys) => {
+        const key = Object.keys(row).find(k => possibleKeys.some(pk => k.toLowerCase().includes(pk.toLowerCase())));
+        return key ? row[key] : null;
+      };
+
+      const code = getVal(['kod', 'code']);
+      const name = getVal(['ad', 'isim', 'name']);
+      let category = getVal(['kategori', 'category', 'tür']);
+      let caliber = getVal(['kalibre', 'caliber', 'çap']);
+      let basePrice = parseFloat(getVal(['fiyat', 'price', 'maliyet'])) || 0;
+
+      if (!code || !name) {
+        errorCount++;
+        errors.push(`Satır ${index + 2}: Kod ve İsim zorunludur.`);
+        continue;
+      }
+
+      try {
+        // Mevcut modeli kod ile ara
+        const existing = await db('models').where('code', code).first();
+
+        // category ve caliber veritabanındaki enum kısıtlamalarına uymalı
+        // Örnek: 'BRG', 'SİPER', 'AR-15' vs. Kalibre: '9x19mm', '5.56x45mm' vb.
+        if (category && !['BRG', 'SİPER', 'AR-15', 'Yedek Parça'].includes(category.toUpperCase())) {
+          // Varsayılanategori
+          category = 'BRG';
+        }
+
+        if (existing) {
+          // Güncelle
+          await db('models')
+            .where('id', existing.id)
+            .update({
+              name,
+              category: category ? category.toUpperCase() : existing.category,
+              caliber: caliber || existing.caliber,
+              base_price: basePrice || existing.base_price,
+              updated_at: db.fn.now()
+            });
+          successCount++;
+        } else {
+          // Yeni ekle
+          await db('models').insert({
+            name,
+            code,
+            category: category ? category.toUpperCase() : 'BRG',
+            caliber: caliber || '9x19mm',
+            status: 'active',
+            base_price: basePrice || 0,
+            created_by: req.user.id
+          });
+          successCount++;
+        }
+      } catch (err) {
+        errorCount++;
+        errors.push(`Satır ${index + 2} (${code}): Veritabanı hatası.`);
+        console.error(`[MODELS IMPORT] Satır ${index + 2} hatası:`, err);
+      }
+    }
+
+    await req.audit('import', 'models', null, 'Yükleme', null, {
+      filename: req.file.originalname,
+      success: successCount,
+      errors: errorCount
+    });
+
+    res.json({
+      message: `İçe aktarma tamamlandı. ${successCount} başarılı, ${errorCount} hatalı.`,
+      successCount,
+      errorCount,
+      errors
+    });
+
+  } catch (error) {
+    console.error('[MODELS IMPORT] Beklenmeyen hata:', error);
+    res.status(500).json({ error: 'Excel dosyası işlenirken bir hata oluştu.' });
   }
 });
 
@@ -169,6 +279,55 @@ router.delete('/:id', authenticate, requireRole('admin', 'production_manager'), 
   } catch (error) {
     console.error('[MODELS] Silme hatası:', error);
     res.status(500).json({ error: 'Model silinemedi.' });
+  }
+});
+
+// ─── Döküman Merkezi ───
+router.get('/documents', authenticate, async (req, res) => {
+  try {
+    const docs = await db('technical_documents').orderBy('uploadedAt', 'desc');
+    res.json(docs);
+  } catch (error) {
+    console.error('[DOCS] Liste hatası:', error);
+    res.status(500).json({ error: 'Dökümanlar getirilemedi.' });
+  }
+});
+
+router.get('/documents/part/:code', authenticate, async (req, res) => {
+  try {
+    const docs = await db('technical_documents')
+      .where('partCode', req.params.code)
+      .orderBy('revisionNumber', 'desc');
+    res.json(docs);
+  } catch (error) {
+    console.error('[DOCS] Parça dökümanları hatası:', error);
+    res.status(500).json({ error: 'Parça dökümanları getirilemedi.' });
+  }
+});
+
+router.post('/documents', authenticate, requireRole('admin', 'engineering'), async (req, res) => {
+  try {
+    const { partCode, title, revisionNumber, fileUrl, fileType } = req.body;
+
+    // Eski dökümanların isLatest durumunu false yap (isteğe bağlı)
+    if (partCode) {
+      await db('technical_documents').where('partCode', partCode).update({ isLatest: false });
+    }
+
+    const doc = await db('technical_documents').insert({
+      partCode,
+      title,
+      revisionNumber: revisionNumber || 1,
+      fileUrl,
+      fileType: fileType || 'application/pdf',
+      uploadedBy: req.user.full_name || req.user.username,
+      isLatest: true
+    }).returning('*');
+
+    res.status(201).json(doc[0]);
+  } catch (error) {
+    console.error('[DOCS] Ekleme hatası:', error);
+    res.status(500).json({ error: 'Döküman eklenemedi.' });
   }
 });
 

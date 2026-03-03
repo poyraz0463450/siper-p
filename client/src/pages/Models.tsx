@@ -34,6 +34,8 @@ export default function Models() {
     // BOM form
     const [bomForm, setBomForm] = useState({ part_id: '', quantity: 1, sort_order: 0, notes: '', is_optional: false });
 
+    const [isImporting, setIsImporting] = useState(false);
+
     useEffect(() => { loadData(); }, []);
 
     const loadData = async () => {
@@ -44,6 +46,27 @@ export default function Models() {
             setParts(Array.isArray(p) ? p : []);
         } catch (err) { console.error(err); }
         finally { setLoading(false); }
+    };
+
+    const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsImporting(true);
+        try {
+            const { importModels } = await import('../services/api');
+            const result = await importModels(file);
+            if (result.error) throw new Error(result.error);
+
+            alert(result.message);
+            loadData();
+        } catch (error: any) {
+            console.error('Import failed:', error);
+            alert('Excel yüklenirken bir hata oluştu: ' + (error.message || 'Bilinmeyen hata'));
+        } finally {
+            setIsImporting(false);
+            e.target.value = ''; // Reset input
+        }
     };
 
     const selectModel = async (m: Model) => {
@@ -101,9 +124,14 @@ export default function Models() {
 
     const handleDeleteModel = async (id: number) => {
         if (confirm('Bu modeli silmek istediğinize emin misiniz?')) {
-            await apiRequest(`/models/${id}`, 'DELETE');
-            if (selectedModel?.id === id) { setSelectedModel(null); setBomParts([]); }
-            loadData();
+            try {
+                const { deleteModel } = await import('../services/api');
+                await deleteModel(id);
+                if (selectedModel?.id === id) { setSelectedModel(null); setBomParts([]); }
+                loadData();
+            } catch (err: any) {
+                alert(err.message || 'Model silinirken bir hata oluştu. Aktif üretim emri olabilir.');
+            }
         }
     };
 
@@ -126,10 +154,17 @@ export default function Models() {
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">Silah modelleri ve malzeme listeleri • {models.length} model</p>
                 </div>
-                <button onClick={() => { setModelForm(defaultModelForm); setShowNewModel(true); }}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg shadow-indigo-500/20">
-                    <Plus className="w-4 h-4" /> Yeni Model
-                </button>
+                <div className="flex items-center gap-3">
+                    <label className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium transition-all cursor-pointer ${isImporting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10'}`}>
+                        {isImporting ? <div className="w-4 h-4 rounded-full border-2 border-white/50 border-t-transparent animate-spin" /> : <Package className="w-4 h-4" />}
+                        {isImporting ? 'Yükleniyor...' : 'Excel\'den İçe Aktar'}
+                        <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleImportExcel} disabled={isImporting} />
+                    </label>
+                    <button onClick={() => { setModelForm(defaultModelForm); setShowNewModel(true); }}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg shadow-indigo-500/20">
+                        <Plus className="w-4 h-4" /> Yeni Model
+                    </button>
+                </div>
             </div>
 
             <div className="flex-1 flex gap-6 overflow-hidden">
@@ -145,8 +180,8 @@ export default function Models() {
                     </div>
                     <div className="flex-1 overflow-y-auto">
                         {filteredModels.map(m => (
-                            <button key={m.id} onClick={() => selectModel(m)}
-                                className={`w-full text-left px-4 py-3 border-b border-white/5 transition-colors flex items-center justify-between group ${selectedModel?.id === m.id ? 'bg-indigo-500/10' : 'hover:bg-white/5'}`}>
+                            <div key={m.id} onClick={() => selectModel(m)}
+                                className={`w-full text-left px-4 py-3 border-b border-white/5 transition-colors flex items-center justify-between group cursor-pointer ${selectedModel?.id === m.id ? 'bg-indigo-500/10' : 'hover:bg-white/5'}`}>
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-medium text-foreground truncate">{m.name}</div>
                                     <div className="flex items-center gap-2 mt-0.5">
@@ -156,10 +191,10 @@ export default function Models() {
                                     </div>
                                 </div>
                                 <button onClick={(e) => { e.stopPropagation(); handleDeleteModel(m.id); }}
-                                    className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Trash2 className="w-3 h-3" />
+                                    className={`p-1.5 rounded-md hover:bg-red-500/10 transition-all flex-shrink-0 ${selectedModel?.id === m.id ? 'text-red-400 bg-red-500/5 opacity-100' : 'text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-400'}`}>
+                                    <Trash2 className="w-4 h-4" />
                                 </button>
-                            </button>
+                            </div>
                         ))}
                     </div>
                 </div>

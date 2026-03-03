@@ -27,17 +27,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             try {
                 const userData = await meApi();
-                if (userData && userData.user) {
-                    // API returns user details, we can map it to our frontend types
+                // The meApi returns the user object directly without a 'user' wrapper
+                // If it fails, it returns { error: '...' }
+                if (userData && !userData.error && userData.id) {
+                    // API returns user details, map to frontend types
                     setUser({
-                        id: userData.user.id.toString(),
-                        uid: userData.user.id.toString(), // Keep uid for legacy compatibility if needed
-                        email: userData.user.email,
-                        displayName: userData.user.full_name || userData.user.username,
-                        role: userData.user.role,
-                        department: userData.user.department,
-                        isApproved: userData.user.is_active,
-                        createdAt: Date.now() // Mock for now or map from response
+                        id: userData.id.toString(),
+                        uid: userData.id.toString(), // Keep uid for legacy compatibility if needed
+                        email: userData.email,
+                        displayName: userData.full_name || userData.username,
+                        role: userData.role,
+                        department: userData.department,
+                        isApproved: userData.is_active,
+                        createdAt: Date.now() // Mock for now
                     } as unknown as AppUser);
                 } else {
                     localStorage.removeItem('token');

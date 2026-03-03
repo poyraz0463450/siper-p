@@ -191,8 +191,8 @@ export default function Dashboard() {
             <div style={{ ...s.ccard, marginBottom: 18 }}>
                 <div style={s.chdr}><h3 style={s.ch3}>📦 Kritik Stok Durumu</h3><span style={s.csub}>En düşük stok oranına sahip parçalar</span></div>
                 <div style={s.cbod}>
-                    <ResponsiveContainer width="100%" height={260}>
-                        {data.charts?.inventory_levels?.length > 0 ? (
+                    {data.charts?.inventory_levels?.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={260}>
                             <BarChart data={data.charts.inventory_levels} barGap={2}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#E8ECF2" />
                                 <XAxis dataKey="code" tick={{ fontSize: 11, fill: "#607D8B" }} />
@@ -201,8 +201,8 @@ export default function Dashboard() {
                                 <Bar dataKey="current" name="Mevcut Stok" fill="#1B2A4A" radius={[4, 4, 0, 0]} />
                                 <Bar dataKey="minimum" name="Min. Stok" fill="#C8102E" radius={[4, 4, 0, 0]} fillOpacity={0.7} />
                             </BarChart>
-                        ) : <div className="flex items-center justify-center h-full text-zinc-500">Kritik stok uyarısı yok</div>}
-                    </ResponsiveContainer>
+                        </ResponsiveContainer>
+                    ) : <div className="flex items-center justify-center h-[260px] text-zinc-500">Kayıt yok</div>}
                 </div>
             </div>
 

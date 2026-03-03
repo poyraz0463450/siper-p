@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { FileText, Search, Upload, Eye, X, FileIcon, User } from 'lucide-react';
-import { getAllDocuments, getDocumentsByPartCode, addDocument } from '../lib/firestoreService';
 import type { TechnicalDocument } from '../lib/types';
 import { useAuth } from '../context/AuthContext';
+import { apiRequest } from '../services/api';
 
 export default function DocumentCenter() {
     const { user } = useAuth();
@@ -25,15 +25,19 @@ export default function DocumentCenter() {
 
     const loadAllDocs = async () => {
         setLoading(true);
-        const docs = await getAllDocuments();
-        setDocuments(docs);
+        try {
+            const docs = await apiRequest('/models/documents');
+            setDocuments(docs || []);
+        } catch (e) { console.error(e); }
         setLoading(false);
     };
 
     const searchByPartCode = async (code: string) => {
         setSelectedPartCode(code);
-        const docs = await getDocumentsByPartCode(code);
-        setPartDocuments(docs);
+        try {
+            const docs = await apiRequest(`/models/documents/part/${code}`);
+            setPartDocuments(docs || []);
+        } catch (e) { console.error(e); }
     };
 
     const handleSearch = () => {
@@ -46,18 +50,15 @@ export default function DocumentCenter() {
         if (!uploadFile || !uploadPartCode || !uploadTitle) return;
         setUploading(true);
         try {
-            // Mock Upload since backend storage endpoint isn't ready
+            // Minimal file handling for demo since multer isn't fully integrated here
             const url = URL.createObjectURL(uploadFile);
 
-            await addDocument({
+            await apiRequest('/models/documents', 'POST', {
                 partCode: uploadPartCode.toUpperCase(),
                 title: uploadTitle,
                 revisionNumber: uploadRevision,
                 fileUrl: url,
-                fileType: uploadFile.type || 'application/pdf',
-                uploadedBy: user?.displayName || user?.email || 'Bilinmeyen',
-                uploadedAt: new Date().toISOString() as any,
-                isLatest: true,
+                fileType: uploadFile.type || 'application/pdf'
             });
 
             setShowUpload(false);
