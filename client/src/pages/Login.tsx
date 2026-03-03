@@ -61,11 +61,9 @@ export default function Login() {
                 <div className="w-full max-w-lg p-12 text-center">
                     {/* Logo */}
                     <div className="mb-10">
-                        <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
-                            <Shield className="w-10 h-10 text-white" />
-                        </div>
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-                            BRG Defence ERP
+                        <img src="/siper-p-logo.png" alt="SİPER-P" className="mx-auto h-24 mb-4 drop-shadow-lg" />
+                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
+                            SİPER-P
                         </h1>
                         <p className="text-sm text-muted-foreground mt-1">Üretim Yönetim Sistemi</p>
                     </div>
@@ -81,10 +79,10 @@ export default function Login() {
                                 <div
                                     key={i}
                                     className={`flex items-center gap-3 rounded-lg px-4 py-3 transition-all duration-500 ${isCompleted
-                                            ? 'bg-emerald-500/10 text-emerald-400'
-                                            : isCurrent
-                                                ? 'bg-blue-500/10 text-blue-400 animate-pulse'
-                                                : 'bg-muted/30 text-muted-foreground/50'
+                                        ? 'bg-emerald-500/10 text-emerald-400'
+                                        : isCurrent
+                                            ? 'bg-blue-500/10 text-blue-400 animate-pulse'
+                                            : 'bg-muted/30 text-muted-foreground/50'
                                         }`}
                                 >
                                     <StepIcon className={`w-5 h-5 flex-shrink-0 ${isCompleted ? 'text-emerald-400' : ''}`} />
@@ -128,11 +126,9 @@ export default function Login() {
 
                     {/* Logo */}
                     <div className="text-center mb-8">
-                        <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/25">
-                            <Shield className="w-8 h-8 text-white" />
-                        </div>
+                        <img src="/siper-p-logo.png" alt="SİPER-P" className="mx-auto h-20 mb-4 drop-shadow-lg" />
                         <h2 className="text-2xl font-bold text-foreground">
-                            BRG Defence ERP
+                            SİPER-P
                         </h2>
                         <p className="text-sm text-muted-foreground mt-1">
                             Güvenli Giriş
@@ -161,7 +157,7 @@ export default function Login() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full rounded-xl border border-white/5 bg-white/5 py-3 pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
-                                    placeholder="ornek@brgdefence.com"
+                                    placeholder="ornek@sirket.com"
                                     required
                                 />
                             </div>
@@ -217,7 +213,7 @@ export default function Login() {
                 {/* Version badge */}
                 <div className="mt-4 text-center">
                     <span className="text-[10px] text-muted-foreground/40 uppercase tracking-widest">
-                        BRG Defence ERP v2.0 — Güvenli Bağlantı
+                        SİPER-P v1.0 — Güvenli Bağlantı
                     </span>
                 </div>
             </div>

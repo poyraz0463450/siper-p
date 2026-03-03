@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
 import { FileText, Search, Upload, Eye, X, FileIcon, User } from 'lucide-react';
 import { getAllDocuments, getDocumentsByPartCode, addDocument } from '../lib/firestoreService';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../lib/firebase';
 import type { TechnicalDocument } from '../lib/types';
 import { useAuth } from '../context/AuthContext';
-import { serverTimestamp } from 'firebase/firestore';
 
 export default function DocumentCenter() {
     const { user } = useAuth();
@@ -49,10 +46,8 @@ export default function DocumentCenter() {
         if (!uploadFile || !uploadPartCode || !uploadTitle) return;
         setUploading(true);
         try {
-            // Upload to Firebase Storage
-            const storageRef = ref(storage, `documents/${uploadPartCode}/${Date.now()}_${uploadFile.name}`);
-            await uploadBytes(storageRef, uploadFile);
-            const url = await getDownloadURL(storageRef);
+            // Mock Upload since backend storage endpoint isn't ready
+            const url = URL.createObjectURL(uploadFile);
 
             await addDocument({
                 partCode: uploadPartCode.toUpperCase(),
@@ -61,7 +56,7 @@ export default function DocumentCenter() {
                 fileUrl: url,
                 fileType: uploadFile.type || 'application/pdf',
                 uploadedBy: user?.displayName || user?.email || 'Bilinmeyen',
-                uploadedAt: serverTimestamp(),
+                uploadedAt: new Date().toISOString() as any,
                 isLatest: true,
             });
 

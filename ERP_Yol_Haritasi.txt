@@ -1,0 +1,367 @@
+SAVUNMA SANAYİ
+ERP SİSTEMİ
+GELİŞTİRME YOL HARİTASI
+Silah Fabrikası Üretim Yönetim Sistemi
+Kapsamlı Modernizasyon & Modül Genişletme Planı
+Versiyon
+2.0
+Tarih
+Mart 2026
+Hazırlayan
+Silah Tasarım Mühendisliği
+Durum
+Taslak
+1. YÖNETİCİ ÖZETİ
+Bu doküman, silah fabrikası üretim yönetim ERP sisteminin kapsamlı modernizasyon planını içermektedir. Mevcut sistem temel CRUD işlevlerine sahip olup, endüstriyel düzeyde bir savunma sanayi ERP'sine dönüştürülecektir.
+Proje üç ana fazda yürütülecektir: mevcut altyapının güçlendirilmesi, yeni kritik modüllerin eklenmesi ve ileri düzey özelliklerin entegrasyonu. PostgreSQL geçişi ilk fazda tamamlanacak olup, tüm yeni modüller bu altyapı üzerine inşa edilecektir.
+3 Faz
+Geliştirme Aşaması
+10+ Modül
+Yeni Fonksiyon
+25+ Tablo
+Veritabanı Şeması
+50+ API
+Endpoint
+2. MEVCUT DURUM ANALİZİ
+2.1 Teknoloji Yığını
+Katman
+Mevcut Teknoloji
+Hedef Teknoloji
+Backend
+Node.js + Express
+Node.js + Express (korunacak)
+Frontend
+React + CSS
+React + TailwindCSS + Recharts
+Veritabanı
+SQLite
+PostgreSQL 16
+Auth
+JWT (temel)
+JWT + RBAC + Audit Log
+Dosya Yönetimi
+Multer (yerel)
+Multer + S3 uyumlu depolama
+API Mimarisi
+REST (temel)
+REST + Swagger dokümantasyon
+2.2 Mevcut Modül Durumu
+Modül
+Durum
+Güçlü Yanlar
+Eksikler
+Dashboard
+Temel OK
+Temel istatistikler
+Grafik yok, widget yok
+Model Yönetimi
+Temel OK
+CRUD, parça ilişkisi
+BOM hiyerarşisi yok
+Parça Yönetimi
+Temel OK
+Malzeme, ısıl işlem, kaplama, görsel
+Revizyon takibi yok
+Stok Takibi
+Geliştirmeli
+Temel stok, düşük stok uyarısı
+Hareket geçmişi zayıf, lot yok
+Üretim Emirleri
+Geliştirmeli
+Temel emir, parça ilişkisi
+İş akışı zayıf, Gantt yok
+Kullanıcı Yönetimi
+Temel OK
+Admin/User rolleri
+Detaylı izin yönetimi yok
+2.3 Kritik Eksiklikler
+Bir savunma sanayi ERP sistemi için aşağıdaki kritik eksiklikler tespit edilmiştir:
+Seri Numarası / Lot Takibi: Yasal zorunluluk olan silah seri numarası izlenebilirliği bulunmuyor
+Kalite Kontrol: Giriş kontrol, proses kontrol, final test ve uygunsuzluk yönetimi eksik
+Ürün Ağacı (BOM): Çok seviyeli hiyerarşik BOM yapısı yok, düz model-parça ilişkisi mevcut
+Operasyon Rotaları: İş merkezi, makine ve operasyon sıralaması tanımlanamıyor
+Tedarik Zinciri: Tedarikçi yönetimi, satınalma ve MRP hesaplaması yok
+Audit Trail: İşlem loglama ve değişiklik geçmişi tutulmuyor
+Raporlama: Grafik tabanlı analitik ve raporlama modülü mevcut değil
+3. POSTGRESQL GEÇİŞ PLANI
+Sistem SQLite'tan PostgreSQL 16'ya geçirilecektir. Bu geçiş, performans, eşzamanlılık, veri bütünlüğü ve ölçeklenebilirlik açısından kritik öneme sahiptir.
+3.1 Geçiş Stratejisi
+pg (node-postgres) ve Knex.js query builder entegrasyonu
+Migration sistemi ile veritabanı şema versiyonlama
+Connection pooling ile yüksek performanslı bağlantı yönetimi
+Transaction desteği ile veri tutarlılığı garantisi
+JSONB alan desteği ile esnek veri yapıları
+Full-text search ile gelişmiş arama yetenekleri
+3.2 Yeni Veritabanı Şeması (Özet)
+Mevcut 7 tablo, 25+ tabloya genişletilecektir. Aşağıda yeni tablo grupları listelenmiştir:
+Modül
+Yeni Tablolar
+Amaç
+Temel (Mevcut)
+users, models, parts, model_parts, inventory, production_orders, production_order_parts
+Mevcut yapı korunacak, genişletilecek
+Seri Numarası
+serial_numbers, serial_number_history, lot_tracking
+Silah izlenebilirlik ve yasal uyum
+BOM
+bom_levels, bom_items, bom_revisions
+Çok seviyeli ürün ağacı
+Operasyonlar
+work_centers, operations, routing, routing_operations
+İş akışı ve operasyon rotaları
+Kalite Kontrol
+qc_inspections, qc_parameters, qc_results, non_conformance, corrective_actions
+Kalite yönetim sistemi
+Tedarik Zinciri
+suppliers, purchase_orders, purchase_order_items, supplier_ratings
+Satınalma ve tedarikçi yönetimi
+Sistem
+audit_logs, notifications, settings, documents
+Loglama, bildirim, doküman yönetimi
+4. FAZ 1: MEVCUT MODÜLLERİ İYİLEŞTİRME
+İlk fazda mevcut modüller profesyonel seviyeye yükseltilecek, PostgreSQL geçişi yapılacak ve altyapı güçlendirilecektir.
+4.1 Dashboard Yenileme
+Recharts ile interaktif grafikler (üretim trendi, stok durumu, kalite metrikleri)
+Widget tabanlı yapı: Her kullanıcı kendi dashboard'unu özelleştirebilecek
+Gerçek zamanlı düşük stok, geciken emirler, kalite uyarıları paneli
+Son aktiviteler timeline'ı ve hızlı erişim kısayolları
+KPI kartları: OEE, üretim verimliliği, fire oranı, zamanında teslimat
+4.2 Parça Yönetimi Genişletme
+Revizyon kontrolü: Her parça değişikliği versiyon numarası ile takip edilecek
+Teknik çizim bağlantısı: PDF/DWG dosya ekleme ve görüntüleme
+Malzeme sertifikası bağlantısı ve onay iş akışı
+Parça kategorileri: Namlu, Mekanizma, Kundak, Aksesuar, Yay, Pim vb.
+Tolerans ve ölçü bilgileri alanları
+Alternatif parça tanımlama ve eşdeğer malzeme yönetimi
+4.3 Stok Yönetimi Güçlendirme
+Çoklu depo/lokasyon desteği (Ana Depo, Üretim Hattı, Karantina, Bitmiş Ürün)
+Lot numarası takibi ve FIFO/LIFO çıkış mantığı
+Barkod/QR kod entegrasyonu altyapısı
+Stok hareket geçmişi: giriş, çıkış, transfer, iade, fire
+Otomatik yeniden sipariş noktası (ROP) ve minimum/maksimum stok seviyeleri
+ABC analizi ve stok değer raporu
+4.4 Üretim Emirleri Geliştirme
+Gelişmiş durum akışı: Taslak > Onay Bekliyor > Onaylı > Üretimde > QC > Tamamlandı
+Öncelik bazlı sıralama ve üretim planlama takvimi
+Malzeme gereksinim kontrolü: Eksik stok uyarısı ve otomatik satınalma talebi
+Operasyon bazlı ilerleme takibi (parça seviyesinde)
+Üretim süresi hesaplama ve gerçek/planlanan karşılaştırma
+Parti bazlı üretim ve alt montaj desteği
+4.5 Kullanıcı & Yetkilendirme
+Granüler RBAC: Admin, Üretim Müdürü, Kalite Kontrol, Depocu, Satınalma, Operatör rolleri
+Modül bazlı okuma/yazma/silme izinleri
+Oturum yönetimi ve çoklu cihaz desteği
+Şifre politikası ve parola sıfırlama
+İşlem log'u: Kim, ne zaman, ne yaptı (audit trail)
+5. FAZ 2: YENİ KRİTİK MODÜLLER
+İkinci fazda silah üretimi için olmazsa olmaz dört yeni modül eklenecektir.
+5.1 Seri Numarası Takip Modülü
+Silah sanayi düzenlemeleri gereği her üretilen silah benzersiz bir seri numarası ile takip edilmelidir. Bu modül, hammaddeden bitmiş ürüne tam izlenebilirlik sağlayacaktır.
+Özellik
+Detay
+Seri No Üretimi
+Otomatik seri numarası formatı: MODEL-YIL-SIRA (ör: MP5-2026-00001)
+Yaşam Döngüsü
+Üretim > Kalite Kontrol > Depo > Sevkiyat > Müşteri takibi
+İzlenebilirlik
+Her seri numarası için: kullanılan parça lot numaraları, üretim operatörleri, QC sonuçları
+Yasal Uyum
+Polis/jandarma kayıt numarası bağlantısı, ihracat izin belgesi ilişkilendirme
+Arama & Sorgulama
+Seri numarası ile anında geçmiş sorgulama, QR kod ile mobil erişim
+Raporlama
+Üretim adetleri, model bazlı dağılım, müşteri bazlı sevkiyat raporları
+5.2 BOM (Ürün Ağacı) & Operasyon Rotaları
+Mevcut düz model-parça ilişkisi, çok seviyeli hiyerarşik bir BOM yapısına dönüştürülecektir. Operasyon rotaları ile her parçanın hangi iş merkezlerinden geçeceği tanımlanacaktır.
+BOM Yapısı: Seviye 0 (Bitmiş Silah) > Seviye 1 (Alt Montajlar: Üst Gövde, Alt Gövde, Namlu Grubu) > Seviye 2 (Parçalar: Tetik Mekanizması, Sürgü, Namlu) > Seviye 3 (Hammadde: 4140 Çelik, 7075 Alüminyum)
+Özellik
+Detay
+Çok Seviyeli BOM
+Sınırsız derinlikte ağaç yapısı, drag & drop düzenleme
+BOM Revizyonları
+Versiyon kontrolü, değişiklik geçmişi, ECN (Engineering Change Notice)
+İş Merkezleri
+CNC Torna, CNC Freze, Enjeksiyon, Isıl İşlem Fırını, Kaplama Hattı, Montaj İstasyonu
+Operasyon Rotası
+Her parça için sıralı operasyon listesi, setup ve çevrim süreleri
+Maliyet Hesaplama
+BOM üzerinden birim maliyet hesaplama (malzeme + işçilik + genel gider)
+Where-Used Analizi
+Bir parçanın hangi modellerde kullanıldığını gösterme
+5.3 Kalite Kontrol (QC) Modülü
+Savunma sanayinde kalite kontrol hayati önem taşır. Giriş kalite kontrolünden son kabul atışına kadar her aşama takip edilecektir.
+Kontrol Tipi
+İçerik
+Giriş Kalite Kontrol
+Hammadde sertifika kontrolü, boyutsal kontrol, malzeme analiz raporu doğrulama
+Proses İçi Kontrol
+CNC sonrası ölçü kontrolü, ısıl işlem sertlik testi, kaplama kalınlık ölçümü
+Alt Montaj Kontrolü
+Montaj tolerans kontrolü, fonksiyon testi, görsel kontrol
+Final Test
+Atış testi, hassasiyet testi, dayanıklılık testi, güvenlik kontrolü
+Uygunsuzluk Yönetimi
+NCR (Non-Conformance Report) oluşturma, kök neden analizi, düzeltici/önleyici faaliyetler
+Kalibrasyon Takibi
+Ölçü aletleri kalibrasyon tarihi, sonraki kalibrasyon planı, sertifika yönetimi
+İstatistiksel Kontrol
+SPC grafikleri, Cp/Cpk hesaplama, kontrol limitleri
+5.4 Tedarik Zinciri & Satınalma
+Malzeme tedarikinden teslimatına kadar tüm satınalma süreçlerinin yönetimi.
+Özellik
+Detay
+Tedarikçi Yönetimi
+Tedarikçi kartı, performans değerlendirme, sertifika takibi, onaylı tedarikçi listesi
+Satınalma Talebi
+Üretim emrinden otomatik talep, manuel talep, onay iş akışı
+Satınalma Siparişi
+PO oluşturma, fiyat karşılaştırma, termin takibi, teslim alma
+MRP
+Malzeme İhtiyaç Planlaması: BOM + Stok + Üretim Planı = Satınalma İhtiyacı
+Fiyat Yönetimi
+Tedarikçi bazlı fiyat listesi, anlaşmalı fiyatlar, döviz kuru takibi
+Teslim Alma
+Gelen mal kabul, miktar/kalite kontrolü, stok girişi otomasyonu
+6. FAZ 3: İLERİ DÜZEY ÖZELLİKLER
+Üçüncü fazda, sistemi endüstriyel düzeyde bir ERP'ye yükselten gelişmiş özellikler eklenecektir.
+6.1 Raporlama & Analitik
+Üretim performans dashboard'u: OEE, verimlilik, fire oranı trendleri
+Stok değer ve hareket raporları, ABC/XYZ analizi
+Kalite raporları: First Pass Yield, hata dağılımı, Pareto analizi
+Maliyet raporları: model bazlı, dönemsel, karşılaştırmalı maliyet analizi
+Excel/PDF export, otomatik rapor zamanlayıcı
+6.2 Doküman Yönetim Sistemi (DMS)
+Teknik çizim yönetimi: revizyon kontrolü, onay iş akışı
+İş talimatları ve prosedürler
+Kalite dokümanları: kontrol planları, PPAP, FMEA
+Sertifika ve belge yönetimi: ISO, NATO AQAP, MIL-STD
+6.3 Bakım Yönetimi (CMMS)
+Makine/ekipman kartları ve bakım geçmişi
+Planlı (önleyici) bakım takvimi ve otomatik hatırlatmalar
+Arıza bildirimi ve iş emri yönetimi
+Yedek parça stok entegrasyonu, takım ömrü takibi
+6.4 Sevkiyat & Lojistik
+Sevkiyat planlaması ve paketleme listesi oluşturma
+Çıkış kalite kontrolü ve son onay
+Kargo/kurye entegrasyonu ve takip numarası
+İrsaliye, fatura ve ihracat belgeleri (varsa) otomasyonu
+6.5 Bildirim & Entegrasyon
+Uygulama içi bildirim sistemi (düşük stok, geciken emir, QC hatası)
+E-posta bildirimleri ve otomatik alarm kuralları
+REST API dokümantasyonu (Swagger/OpenAPI) dış sistemlerle entegrasyon için
+Barkod/QR kod yazdırma ve tarayıcı entegrasyonu altyapısı
+7. UYGULAMA TAKVİMİ
+Faz
+İçerik
+Öncelik
+Bağımlılık
+FAZ 1A
+PostgreSQL geçişi, migration altyapısı
+Kritik
+Yok (ilk adım)
+FAZ 1B
+Dashboard yenileme, UI/UX iyileştirme
+Yüksek
+1A
+FAZ 1C
+Parça yönetimi genişletme, revizyon sistemi
+Yüksek
+1A
+FAZ 1D
+Stok yönetimi güçlendirme, çoklu depo
+Yüksek
+1A
+FAZ 1E
+Üretim emirleri geliştirme, iş akışı
+Yüksek
+1A
+FAZ 1F
+RBAC yetkilendirme ve audit log
+Yüksek
+1A
+FAZ 2A
+Seri Numarası Takip Modülü
+Kritik
+1A, 1D
+FAZ 2B
+BOM & Operasyon Rotaları
+Kritik
+1A, 1C
+FAZ 2C
+Kalite Kontrol Modülü
+Kritik
+2A, 2B
+FAZ 2D
+Tedarik Zinciri & Satınalma
+Yüksek
+1D, 2B
+FAZ 3A
+Raporlama & Analitik
+Orta
+Tüm Faz 2
+FAZ 3B
+Doküman Yönetimi
+Orta
+1F
+FAZ 3C
+Bakım Yönetimi
+Orta
+1A
+FAZ 3D
+Sevkiyat & Lojistik
+Orta
+2A, 2D
+FAZ 3E
+Bildirim & Entegrasyon
+Düşük
+Tüm Faz 2
+8. TEKNİK MİMARİ
+8.1 Proje Yapısı (Hedef)
+erp-system/
+├── server/
+│   ├── config/           # DB, env, constants
+│   ├── middleware/        # auth, rbac, audit, validation
+│   ├── models/            # Knex model katmanı
+│   ├── routes/            # API route'ları (modül bazlı)
+│   ├── services/          # İş mantığı katmanı
+│   ├── migrations/        # Knex migration dosyaları
+│   ├── seeds/             # Test/demo verileri
+│   ├── utils/             # Yardımcı fonksiyonlar
+│   └── index.js
+├── client/
+│   ├── src/
+│   │   ├── components/    # Paylaşılan bileşenler
+│   │   ├── pages/         # Sayfa bileşenleri
+│   │   ├── hooks/         # Custom React hooks
+│   │   ├── context/       # Global state yönetimi
+│   │   ├── services/      # API çağrı katmanı
+│   │   ├── utils/         # Frontend yardımcılar
+│   │   └── styles/        # Global stiller
+│   └── public/
+├── docs/                  # API docs, schema diyagramları
+├── scripts/               # Yardımcı scriptler
+└── docker/                # Docker yapılandırması
+8.2 API Endpoint Planı (Yeni Modüller)
+Modül
+Temel Endpoint'ler
+Özel Endpoint'ler
+Seri No
+/api/serial-numbers (CRUD)
+/:id/history, /search, /generate-batch, /qr-code
+BOM
+/api/bom (CRUD)
+/:id/tree, /:id/cost, /:id/where-used, /revisions
+İş Merkezi
+/api/work-centers (CRUD)
+/:id/capacity, /:id/schedule, /utilization
+QC
+/api/qc-inspections (CRUD)
+/templates, /:id/results, /non-conformance, /statistics
+Tedarik
+/api/suppliers (CRUD)
+/purchase-orders, /mrp-calculate, /:id/ratings
+Raporlar
+/api/reports
+/production, /quality, /inventory, /cost, /export
+Bu doküman, ERP sistemi geliştirme sürecinde canlı bir referans olarak güncellenecektir.
+Her faz tamamlandıkça yeni gereksinimler ve öğrenilen dersler dokümanın güncel versiyonuna eklenecektir.

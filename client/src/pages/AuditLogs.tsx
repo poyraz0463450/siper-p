@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { History, RefreshCw, Search } from 'lucide-react';
-import { collection, getDocs, query, orderBy, limit as firestoreLimit } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { fetchAuditLogs } from '../services/api';
 
 interface AuditLog {
     id: string;
@@ -24,10 +23,8 @@ export default function AuditLogs() {
     const loadLogs = async () => {
         setLoading(true);
         try {
-            const snap = await getDocs(
-                query(collection(db, 'auditLogs'), orderBy('timestamp', 'desc'), firestoreLimit(200))
-            );
-            setLogs(snap.docs.map(d => ({ id: d.id, ...d.data() } as AuditLog)));
+            const data = await fetchAuditLogs();
+            setLogs(data);
         } catch (err) {
             console.error(err);
         } finally {
@@ -98,7 +95,7 @@ export default function AuditLogs() {
                             {filtered.map(log => (
                                 <tr key={log.id} className="border-b border-white/5 hover:bg-white/[0.03] transition-colors">
                                     <td className="px-4 py-3 text-xs text-muted-foreground font-mono whitespace-nowrap">
-                                        {log.timestamp?.toDate ? log.timestamp.toDate().toLocaleString('tr-TR') : '—'}
+                                        {log.timestamp ? new Date(log.timestamp).toLocaleString('tr-TR') : '—'}
                                     </td>
                                     <td className="px-4 py-3 font-medium text-foreground text-xs">{log.userName || '—'}</td>
                                     <td className="px-4 py-3">
@@ -112,6 +109,6 @@ export default function AuditLogs() {
                     </table>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

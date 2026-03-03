@@ -12,6 +12,7 @@ import SerialTracking from './pages/SerialTracking';
 import QualityControl from './pages/QualityControl';
 import DocumentCenter from './pages/DocumentCenter';
 import AdminPanel from './pages/AdminPanel';
+import Reports from './pages/Reports';
 import Layout from './layouts/Layout';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -60,6 +61,7 @@ function App() {
             <Route path="quality-control" element={<QualityControl />} />
             <Route path="documents" element={<DocumentCenter />} />
             <Route path="audit-logs" element={<AuditLogs />} />
+            <Route path="reports" element={<Reports />} />
             <Route path="admin" element={
               <AdminRoute>
                 <AdminPanel />

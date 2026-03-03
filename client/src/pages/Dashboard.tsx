@@ -1,206 +1,279 @@
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import {
-    RefreshCw, Package, ClipboardList, AlertTriangle, QrCode,
-    ShieldCheck, ArrowUpRight, TrendingUp, Activity
-} from 'lucide-react';
-import { getDashboardStats, getAllSerials, getActiveAlerts } from '../lib/firestoreService';
-import type { StockAlert, SerialRecord } from '../lib/types';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Line } from "recharts";
+import { getDashboardStats } from "../lib/firestoreService";
+import { useAuth } from "../context/AuthContext";
+import { RefreshCw } from "lucide-react";
 
-interface DashboardStats {
-    totalParts: number;
-    criticalStock: number;
-    activeOrders: number;
-    pendingOrders: number;
-    completedOrders: number;
-    activeAlerts: number;
-}
+const STATUS_CONFIG: Record<string, any> = {
+    draft: { label: "Taslak", color: "#78909C", bg: "#ECEFF1" },
+    pending_approval: { label: "Onay Bekliyor", color: "#E65100", bg: "#FFF3E0" },
+    approved: { label: "Onaylı", color: "#1565C0", bg: "#E3F2FD" },
+    in_production: { label: "Üretimde", color: "#2E7D32", bg: "#E8F5E9" },
+    quality_check: { label: "Kalite Kontrol", color: "#6A1B9A", bg: "#F3E5F5" },
+    completed: { label: "Tamamlandı", color: "#1B5E20", bg: "#C8E6C9" },
+    cancelled: { label: "İptal", color: "#B71C1C", bg: "#FFCDD2" },
+};
+
+const PIE_COLORS = ["#1B2A4A", "#C8102E", "#2E7D32", "#E65100", "#1565C0", "#6A1B9A", "#78909C"];
+
+const PRIORITY_CONFIG: Record<string, any> = {
+    low: { label: "Düşük", color: "#78909C" },
+    normal: { label: "Normal", color: "#1565C0" },
+    high: { label: "Yüksek", color: "#E65100" },
+    urgent: { label: "Acil", color: "#B71C1C" }
+};
+
+const s: any = {
+    page: { fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", background: "#F4F6F9", minHeight: "100vh", padding: "28px 32px" },
+    hdr: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, paddingBottom: 20, borderBottom: "2px solid #E8ECF2" },
+    h1: { fontSize: 26, fontWeight: 700, color: "#1B2A4A", margin: 0, display: "flex", alignItems: "center", gap: 10 },
+    greet: { fontSize: 14, color: "#607D8B", margin: "6px 0 0" },
+    date: { display: "inline-block", marginLeft: 12, paddingLeft: 12, borderLeft: "1px solid #CFD8DC", color: "#90A4AE", fontSize: 13 },
+    ref: { background: "#F5F7FA", border: "1px solid #E0E0E0", color: "#607D8B", width: 38, height: 38, borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 },
+    kgrid: { display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 14, marginBottom: 24 },
+    kcard: (hover: boolean) => ({ background: "white", borderRadius: 10, padding: "18px 16px", display: "flex", alignItems: "center", gap: 12, border: "1px solid #EEF0F4", boxShadow: hover ? "0 4px 16px rgba(27,42,74,.1)" : "0 1px 4px rgba(0,0,0,.06)", cursor: "pointer", transition: "all .2s", position: "relative", overflow: "hidden", transform: hover ? "translateY(-2px)" : "none", borderLeft: hover ? "3px solid #1B2A4A" : "3px solid transparent" }),
+    kicon: (bg: string, c: string) => ({ width: 44, height: 44, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: bg, color: c, flexShrink: 0 }),
+    kval: { fontSize: 26, fontWeight: 800, color: "#1B2A4A", lineHeight: 1.1, letterSpacing: -0.5 },
+    klab: { fontSize: 11.5, color: "#78909C", fontWeight: 500, marginTop: 2 },
+    crow: { display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 18, marginBottom: 18 },
+    ccard: { background: "white", borderRadius: 12, boxShadow: "0 1px 4px rgba(0,0,0,.06)", border: "1px solid #EEF0F4", overflow: "hidden" },
+    chdr: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px 12px", borderBottom: "1px solid #F5F5F5" },
+    ch3: { fontSize: 15, fontWeight: 600, color: "#1B2A4A", margin: 0, display: "flex", alignItems: "center", gap: 8 },
+    csub: { fontSize: 12, color: "#90A4AE" },
+    cbod: { padding: "16px 12px 8px" },
+    brow: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 },
+    phdr: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid #F5F5F5" },
+    plink: { fontSize: 12, color: "#1565C0", textDecoration: "none", fontWeight: 500, cursor: "pointer" },
+    pbod: { padding: "12px 16px", maxHeight: 360, overflowY: "auto" },
+    arow: (crit: boolean) => ({ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 8, background: crit ? "#FFF8F8" : "#FAFBFC", border: "1px solid #EEF0F4", borderLeft: crit ? "3px solid #C8102E" : "1px solid #EEF0F4", marginBottom: 8 }),
+    aname: { fontSize: 13, fontWeight: 600, color: "#37474F" },
+    acode: { fontSize: 11, color: "#90A4AE", fontFamily: "Courier New, monospace" },
+    sbar: { width: 60, height: 6, background: "#ECEFF1", borderRadius: 3, overflow: "hidden" },
+    snum: { fontSize: 12, color: "#607D8B", whiteSpace: "nowrap" },
+    cbadge: { fontSize: 9, fontWeight: 700, color: "#C8102E", background: "#FFEBEE", padding: "2px 6px", borderRadius: 4, letterSpacing: 0.5 },
+    orow: { display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 8, background: "#FAFBFC", border: "1px solid #EEF0F4", marginBottom: 6 },
+    onum: { fontSize: 13, fontWeight: 700, color: "#1B2A4A", fontFamily: "Courier New, monospace", letterSpacing: 0.3 },
+    omod: { fontSize: 12, color: "#78909C" },
+    oqty: { fontSize: 13, fontWeight: 600, color: "#37474F" },
+    odate: { fontSize: 11, color: "#B0BEC5" },
+    sbadge: (c: string, bg: string) => ({ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 12, color: c, background: bg, whiteSpace: "nowrap" }),
+    pdot: (c: string) => ({ width: 8, height: 8, borderRadius: "50%", background: c, flexShrink: 0, display: "inline-block" }),
+    qs: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginTop: 6 },
+    qsc: { background: "#F8F9FC", border: "1px solid #EEF0F4", borderRadius: 10, padding: 16, display: "flex", alignItems: "center", gap: 12 },
+    qsv: { fontSize: 20, fontWeight: 800, color: "#1B2A4A", lineHeight: 1.1 },
+    qsl: { fontSize: 11, color: "#90A4AE", marginTop: 2 },
+};
 
 export default function Dashboard() {
-    const navigate = useNavigate();
     const { user } = useAuth();
-    const [stats, setStats] = useState<DashboardStats>({
-        totalParts: 0, criticalStock: 0, activeOrders: 0,
-        pendingOrders: 0, completedOrders: 0, activeAlerts: 0
-    });
-    const [recentSerials, setRecentSerials] = useState<SerialRecord[]>([]);
-    const [alerts, setAlerts] = useState<StockAlert[]>([]);
+    const [hov, setHov] = useState<string | null>(null);
+    const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => { fetchAll(); }, []);
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
-    const fetchAll = async () => {
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
-            const [s, serials, al] = await Promise.all([
-                getDashboardStats(),
-                getAllSerials(),
-                getActiveAlerts(),
-            ]);
-            setStats(s);
-            setRecentSerials(serials.slice(0, 5));
-            setAlerts(al.slice(0, 5));
+            const stats = await getDashboardStats();
+            setData(stats);
         } catch (err) {
-            console.error('Dashboard fetch error:', err);
+            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    const statCards = [
-        {
-            label: 'Aktif Üretim Emirleri', value: stats.activeOrders,
-            icon: ClipboardList, color: 'from-blue-500 to-indigo-500',
-            onClick: () => navigate('/production'),
-        },
-        {
-            label: 'Bekleyen Emirler', value: stats.pendingOrders,
-            icon: Activity, color: 'from-amber-500 to-orange-500',
-            onClick: () => navigate('/production'),
-        },
-        {
-            label: 'Kritik Stok', value: stats.criticalStock,
-            icon: AlertTriangle, color: 'from-red-500 to-pink-500',
-            onClick: () => navigate('/inventory?filter=critical'),
-        },
-        {
-            label: 'Toplam Parça', value: stats.totalParts,
-            icon: Package, color: 'from-emerald-500 to-teal-500',
-            onClick: () => navigate('/inventory'),
-        },
-        {
-            label: 'Tamamlanan Üretim', value: stats.completedOrders,
-            icon: TrendingUp, color: 'from-violet-500 to-purple-500',
-            onClick: () => navigate('/production'),
-        },
-        {
-            label: 'Aktif Uyarılar', value: stats.activeAlerts,
-            icon: AlertTriangle, color: 'from-red-400 to-amber-500',
-            onClick: () => navigate('/inventory?filter=critical'),
-        },
+    if (loading || !data) {
+        return (
+            <div className="flex items-center justify-center h-full w-full">
+                <RefreshCw className="animate-spin w-8 h-8 text-indigo-500" />
+            </div>
+        );
+    }
+
+    const kpis = [
+        { id: "models", icon: "⬡", val: data.kpis?.models || 0, label: "Silah Modeli", bg: "#E8EDF5", c: "#1B2A4A" },
+        { id: "parts", icon: "⚙", val: data.kpis?.parts || 0, label: "Toplam Parça", bg: "#ECEFF1", c: "#455A64" },
+        { id: "prod", icon: "▶", val: data.kpis?.in_production_orders || 0, label: "Üretimde", bg: "#E8F5E9", c: "#2E7D32" },
+        { id: "pend", icon: "⏱", val: data.kpis?.pending_orders || 0, label: "Bekleyen Emir", bg: "#FFF8E1", c: "#E65100" },
+        { id: "low", icon: "⚠", val: data.kpis?.low_stock || 0, label: "Düşük Stok", bg: "#FFEBEE", c: "#C8102E" },
+        { id: "done", icon: "✓", val: data.kpis?.completed_orders || 0, label: "Tamamlanan", bg: "#E3F2FD", c: "#0D47A1" },
     ];
 
+    // Map API data for the pie chart
+    const pieData = (data.charts?.orders_by_status || []).map((s: any) => ({
+        name: STATUS_CONFIG[s.status]?.label || s.status,
+        value: s.count
+    }));
+
+    // Map API data to line charts
+    const monthlyData = [
+        { name: "Oca", uretim: 18, hedef: 20 },
+        { name: "Şub", uretim: 22, hedef: 20 },
+        { name: "Mar", uretim: 15, hedef: 20 },
+    ]; // Still mock because no monthly trend endpoint
+
     return (
-        <div className="p-6 space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
+        <div style={s.page}>
+            {/* HEADER */}
+            <div style={s.hdr}>
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">
-                        Hoş Geldiniz, {user?.displayName || user?.email}
-                    </h1>
-                    <p className="text-sm text-muted-foreground mt-1">BRG Defence Üretim Yönetim Sistemi</p>
+                    <h1 style={s.h1}><span style={{ color: "#C8102E", fontSize: 24 }}>🛡</span> Kontrol Paneli</h1>
+                    <p style={s.greet}>İyi günler, <strong style={{ color: "#37474F" }}>{user?.displayName || 'Kullanıcı'}</strong><span style={s.date}>{dateStr}</span></p>
                 </div>
-                <button
-                    onClick={fetchAll}
-                    className={`p-2.5 rounded-xl hover:bg-white/5 text-muted-foreground hover:text-foreground transition-all ${loading ? 'animate-spin' : ''}`}
-                    disabled={loading}
-                >
-                    <RefreshCw className="h-5 w-5" />
-                </button>
+                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <div style={{ position: "relative", fontSize: 20, color: "#607D8B", cursor: "pointer" }}>
+                        🔔
+                        {data.kpis?.unread_notifications > 0 && <span style={{ position: "absolute", top: -6, right: -8, background: "#C8102E", color: "white", fontSize: 10, fontWeight: 700, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>{data.kpis.unread_notifications}</span>}
+                    </div>
+                    <button style={s.ref} onClick={loadData}>↻</button>
+                </div>
             </div>
 
-            {/* Stat Cards */}
-            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-                {statCards.map((card, i) => (
-                    <button
-                        key={i}
-                        onClick={card.onClick}
-                        className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-5 text-left transition-all duration-300 hover:bg-white/[0.05] hover:border-white/10 hover:shadow-lg"
-                    >
-                        <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${card.color} opacity-5 rounded-full -translate-y-6 translate-x-6 group-hover:opacity-10 transition-opacity`} />
-                        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-3 shadow-lg`}>
-                            <card.icon className="w-4 h-4 text-white" />
+            {/* KPI CARDS */}
+            <div style={s.kgrid}>
+                {kpis.map(k => (
+                    <div key={k.id} style={s.kcard(hov === k.id)} onMouseEnter={() => setHov(k.id)} onMouseLeave={() => setHov(null)}>
+                        <div style={s.kicon(k.bg, k.c)}>{k.icon}</div>
+                        <div style={{ flex: 1 }}>
+                            <div style={s.kval}>{k.val}</div>
+                            <div style={s.klab}>{k.label}</div>
                         </div>
-                        <div className="text-2xl font-bold text-foreground font-mono-numbers">
-                            {loading ? '—' : card.value}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                            {card.label}
-                            <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                    </button>
+                        <span style={{ color: "#CFD8DC", fontSize: 16 }}>›</span>
+                    </div>
                 ))}
             </div>
 
-            {/* Two column grid */}
-            <div className="grid gap-6 lg:grid-cols-2">
-                {/* Recent Serial Tracking */}
-                <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                            <QrCode className="w-4 h-4 text-blue-400" />
-                            Son Seri Numaraları
-                        </h3>
-                        <button
-                            onClick={() => navigate('/serial-tracking')}
-                            className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
-                        >
-                            Tümünü Gör →
-                        </button>
+            {/* CHARTS ROW */}
+            <div style={s.crow}>
+                <div style={s.ccard}>
+                    <div style={s.chdr}><h3 style={s.ch3}>📈 Üretim Trendi</h3><span style={s.csub}>2026 yılı aylık</span></div>
+                    <div style={s.cbod}>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <AreaChart data={monthlyData}>
+                                <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#1B2A4A" stopOpacity={0.3} /><stop offset="95%" stopColor="#1B2A4A" stopOpacity={0} /></linearGradient></defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#E8ECF2" />
+                                <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#607D8B" }} />
+                                <YAxis tick={{ fontSize: 12, fill: "#607D8B" }} />
+                                <Tooltip contentStyle={{ background: "#fff", border: "1px solid #E0E0E0", borderRadius: 8, fontSize: 13 }} />
+                                <Area type="monotone" dataKey="uretim" name="Üretim" stroke="#1B2A4A" fill="url(#g1)" strokeWidth={2.5} />
+                                <Line type="monotone" dataKey="hedef" name="Hedef" stroke="#C8102E" strokeDasharray="5 5" strokeWidth={2} dot={false} />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
-                    <div className="space-y-2">
-                        {recentSerials.length === 0 ? (
-                            <p className="text-sm text-muted-foreground py-4 text-center">Henüz kayıt yok</p>
-                        ) : (
-                            recentSerials.map(s => (
-                                <div key={s.id} className="flex items-center justify-between rounded-xl bg-white/[0.03] px-4 py-3 hover:bg-white/[0.06] transition-colors cursor-pointer"
-                                    onClick={() => navigate(`/serial-tracking?search=${s.serialNumber}`)}
-                                >
-                                    <div>
-                                        <span className="text-sm font-mono font-medium text-foreground">{s.serialNumber}</span>
-                                        <span className="text-xs text-muted-foreground ml-2">{s.modelName}</span>
-                                    </div>
-                                    <span className={`text-xs px-2 py-1 rounded-full ${s.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400' :
-                                            s.status === 'in_production' ? 'bg-blue-500/10 text-blue-400' :
-                                                'bg-muted text-muted-foreground'
-                                        }`}>
-                                        {s.status === 'completed' ? 'Tamamlandı' : s.status === 'in_production' ? 'Üretimde' : s.status}
-                                    </span>
+                </div>
+                <div style={s.ccard}>
+                    <div style={s.chdr}><h3 style={s.ch3}>🎯 Emir Dağılımı</h3><span style={s.csub}>Toplam: {data.kpis?.total_orders || 0}</span></div>
+                    <div style={s.cbod}>
+                        <ResponsiveContainer width="100%" height={250}>
+                            {pieData.length > 0 ? (
+                                <PieChart>
+                                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} dataKey="value" label={({ name, value }) => `${name}: ${value}`} labelLine={{ stroke: "#90A4AE", strokeWidth: 1 }}>
+                                        {pieData.map((_: any, i: number) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-zinc-500">Veri yok</div>
+                            )}
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+
+            {/* INVENTORY BAR CHART */}
+            <div style={{ ...s.ccard, marginBottom: 18 }}>
+                <div style={s.chdr}><h3 style={s.ch3}>📦 Kritik Stok Durumu</h3><span style={s.csub}>En düşük stok oranına sahip parçalar</span></div>
+                <div style={s.cbod}>
+                    <ResponsiveContainer width="100%" height={260}>
+                        {data.charts?.inventory_levels?.length > 0 ? (
+                            <BarChart data={data.charts.inventory_levels} barGap={2}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#E8ECF2" />
+                                <XAxis dataKey="code" tick={{ fontSize: 11, fill: "#607D8B" }} />
+                                <YAxis tick={{ fontSize: 12, fill: "#607D8B" }} />
+                                <Tooltip contentStyle={{ background: "#fff", border: "1px solid #E0E0E0", borderRadius: 8, fontSize: 13 }} />
+                                <Bar dataKey="current" name="Mevcut Stok" fill="#1B2A4A" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="minimum" name="Min. Stok" fill="#C8102E" radius={[4, 4, 0, 0]} fillOpacity={0.7} />
+                            </BarChart>
+                        ) : <div className="flex items-center justify-center h-full text-zinc-500">Kritik stok uyarısı yok</div>}
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            {/* BOTTOM PANELS */}
+            <div style={s.brow}>
+                {/* Low Stock */}
+                <div style={s.ccard}>
+                    <div style={s.phdr}><h3 style={{ ...s.ch3, gap: 8 }}><span style={{ color: "#E65100" }}>⚠</span> Düşük Stok Uyarıları</h3><span style={s.plink}>Tümünü Gör ›</span></div>
+                    <div style={s.pbod}>
+                        {data.lists?.low_stock_items?.length > 0 ? data.lists.low_stock_items.map((item: any, i: number) => (
+                            <div key={i} style={s.arow(item.is_critical)}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={s.aname}>{item.part_name}</div>
+                                    <div style={s.acode}>{item.part_code}</div>
                                 </div>
-                            ))
-                        )}
+                                <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                                    <div style={s.sbar}>
+                                        <div style={{ height: "100%", borderRadius: 3, width: `${Math.min(100, item.min_quantity > 0 ? (item.quantity / item.min_quantity) * 100 : 0)}%`, background: item.quantity === 0 ? "#B71C1C" : item.quantity < item.min_quantity / 2 ? "#E65100" : "#F57F17" }} />
+                                    </div>
+                                    <span style={s.snum}><strong style={{ color: "#37474F" }}>{item.quantity}</strong> / {item.min_quantity}</span>
+                                </div>
+                                {item.is_critical && <span style={s.cbadge}>KRİTİK</span>}
+                            </div>
+                        )) : <div className="p-4 text-center text-sm text-zinc-500">Kayıt yok</div>}
                     </div>
                 </div>
 
-                {/* Stock Alerts */}
-                <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4 text-amber-400" />
-                            Stok Uyarıları
-                        </h3>
-                        <button
-                            onClick={() => navigate('/inventory?filter=critical')}
-                            className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
-                        >
-                            Tümünü Gör →
-                        </button>
-                    </div>
-                    <div className="space-y-2">
-                        {alerts.length === 0 ? (
-                            <div className="flex flex-col items-center py-6">
-                                <ShieldCheck className="w-8 h-8 text-emerald-400/50 mb-2" />
-                                <p className="text-sm text-muted-foreground">Tüm stoklar yeterli seviyede</p>
-                            </div>
-                        ) : (
-                            alerts.map(a => (
-                                <div key={a.id} className="flex items-center justify-between rounded-xl bg-white/[0.03] px-4 py-3">
-                                    <div>
-                                        <span className="text-sm font-medium text-foreground">{a.partName}</span>
-                                        <span className="text-xs text-muted-foreground ml-2">{a.partCode}</span>
+                {/* Recent Orders */}
+                <div style={s.ccard}>
+                    <div style={s.phdr}><h3 style={s.ch3}>📋 Son Üretim Emirleri</h3><span style={s.plink}>Tümünü Gör ›</span></div>
+                    <div style={s.pbod}>
+                        {data.lists?.recent_orders?.length > 0 ? data.lists.recent_orders.map((o: any, i: number) => {
+                            const sc = STATUS_CONFIG[o.status] || { label: o.status, color: "#78909C", bg: "#ECEFF1" };
+                            const pc = PRIORITY_CONFIG[o.priority] || { color: "#78909C" };
+                            return (
+                                <div key={i} style={s.orow}>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={s.onum}>{o.order_number}</div>
+                                        <div style={s.omod}>{o.model_name}</div>
                                     </div>
-                                    <div className="text-right">
-                                        <span className={`text-sm font-mono font-bold ${a.alertType === 'critical' ? 'text-red-400' : 'text-amber-400'}`}>
-                                            {a.currentStock}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground"> / {a.minLevel}</span>
+                                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                                        <div style={s.oqty}>{o.quantity} adet</div>
+                                        <div style={s.odate}>{new Date(o.created_at).toLocaleDateString('tr-TR')}</div>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                                        <span style={s.sbadge(sc.color, sc.bg)}>{sc.label}</span>
+                                        {o.priority && o.priority !== "normal" && <span style={s.pdot(pc.color)} />}
                                     </div>
                                 </div>
-                            ))
-                        )}
+                            );
+                        }) : <div className="p-4 text-center text-sm text-zinc-500">Kayıt yok</div>}
                     </div>
                 </div>
+            </div>
+
+            {/* QUICK STATS FOOTER */}
+            <div style={s.qs}>
+                {[
+                    { icon: "⚡", val: `${data.kpis?.completion_rate}%`, label: "Tamamlanma Oranı" },
+                    { icon: "🎯", val: data.kpis?.critical_parts || 0, label: "Emniyet Kritik Parça" },
+                    { icon: "📦", val: (data.kpis?.parts || 0) - (data.kpis?.low_stock || 0), label: "Stokta Yeterli Parça" },
+                    { icon: "📈", val: data.kpis?.in_production_orders || 0, label: "Aktif Üretim" },
+                ].map((q, i) => (
+                    <div key={i} style={s.qsc}>
+                        <span style={{ fontSize: 22 }}>{q.icon}</span>
+                        <div>
+                            <div style={s.qsv}>{q.val}</div>
+                            <div style={s.qsl}>{q.label}</div>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

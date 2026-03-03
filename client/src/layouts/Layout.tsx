@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
     LayoutDashboard, Package, Layers, ClipboardList, LogOut, Menu, X,
     History as HistoryIcon, ShoppingBag, FileText, QrCode, ShieldCheck,
-    Users, Bell, ChevronDown, ChevronRight, Search
+    Users, Bell, ChevronDown, ChevronRight, Search, BarChart2
 } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { cn } from '../lib/utils';
@@ -61,6 +61,7 @@ const NAV_SECTIONS: NavSection[] = [
     {
         title: 'Yönetim',
         items: [
+            { href: '/reports', label: 'Raporlar & Analizler', icon: BarChart2 },
             { href: '/admin', label: 'Kullanıcı Yönetimi', icon: Users, adminOnly: true },
             { href: '/audit-logs', label: 'İşlem Geçmişi', icon: HistoryIcon },
         ],
@@ -113,10 +114,8 @@ export default function Layout() {
             <div className="fixed top-0 left-0 right-0 h-12 z-50 flex items-center bg-[#1a1f2e] border-b border-white/5">
                 {/* Window-like title bar */}
                 <div className="flex items-center gap-2 px-4 w-64 border-r border-white/5 h-full flex-shrink-0">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                        <ShieldCheck className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-sm font-bold text-foreground truncate">BRG Defence ERP</span>
+                    <img src="/siper-p-logo.png" alt="SİPER-P" className="w-7 h-7 rounded-lg" />
+                    <span className="text-sm font-bold text-foreground truncate">SİPER-P</span>
                     {/* Mobile menu toggle */}
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -135,7 +134,7 @@ export default function Layout() {
                                 type="text"
                                 value={serialSearch}
                                 onChange={(e) => setSerialSearch(e.target.value)}
-                                placeholder="Seri numarası ara... (BRG9-...)"
+                                placeholder="Seri numarası ara..."
                                 className="w-full h-8 rounded-lg bg-white/5 border border-white/5 pl-9 pr-4 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
                             />
                         </div>

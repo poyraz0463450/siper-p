@@ -123,8 +123,8 @@ export default function AdminPanel() {
                         <div key={u.uid} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 flex items-center gap-4">
                             {/* Avatar */}
                             <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${u.role === 'Admin' ? 'bg-amber-500/10 text-amber-400' :
-                                    u.role === 'Engineer' ? 'bg-blue-500/10 text-blue-400' :
-                                        'bg-emerald-500/10 text-emerald-400'
+                                u.role === 'Engineer' ? 'bg-blue-500/10 text-blue-400' :
+                                    'bg-emerald-500/10 text-emerald-400'
                                 }`}>
                                 <span className="text-lg font-bold">{u.displayName?.charAt(0).toUpperCase() || '?'}</span>
                             </div>
@@ -134,8 +134,8 @@ export default function AdminPanel() {
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="text-sm font-semibold text-foreground">{u.displayName}</span>
                                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${u.role === 'Admin' ? 'bg-amber-500/10 text-amber-400' :
-                                            u.role === 'Engineer' ? 'bg-blue-500/10 text-blue-400' :
-                                                'bg-emerald-500/10 text-emerald-400'
+                                        u.role === 'Engineer' ? 'bg-blue-500/10 text-blue-400' :
+                                            'bg-emerald-500/10 text-emerald-400'
                                         }`}>
                                         {u.role}
                                     </span>
@@ -192,7 +192,7 @@ export default function AdminPanel() {
                                     <div>
                                         <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">E-Posta</label>
                                         <input value={formEmail} onChange={e => setFormEmail(e.target.value)}
-                                            placeholder="kullanici@brgdefence.com"
+                                            placeholder="kullanici@sirket.com"
                                             className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-amber-500/50" />
                                     </div>
                                     <div>
@@ -218,8 +218,8 @@ export default function AdminPanel() {
                                             type="button"
                                             onClick={() => toggleModule(mod.key)}
                                             className={`px-3 py-2 rounded-lg text-xs font-medium text-left transition-all ${formModules.includes(mod.key)
-                                                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                                    : 'bg-white/5 text-muted-foreground border border-white/5 hover:bg-white/10'
+                                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                                : 'bg-white/5 text-muted-foreground border border-white/5 hover:bg-white/10'
                                                 }`}
                                         >
                                             {formModules.includes(mod.key) ? '✓ ' : ''}{mod.label}
